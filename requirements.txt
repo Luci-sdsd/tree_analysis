@@ -1,0 +1,15 @@
+# pip install openai
+# pip install streamlit 
+# pip install pillow
+# pip install akshare
+# pip install azure-identity 
+
+openai==1.99.9
+streamlit
+azure-identity
+pandas
+geopy
+pydeck
+pillow
+fpdf2
+openpyxl
