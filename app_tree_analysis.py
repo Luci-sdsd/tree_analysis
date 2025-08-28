@@ -1,11 +1,11 @@
 # filepath: /home/djiang/jiang_ws/coding_ws/tree_health_analysis/app.py
 import streamlit as st
-from openai import AzureOpenAI, RateLimitError
+from openai import AzureOpenAI #, RateLimitError
 from PIL import Image
 import base64
 import os
 import json
-from azure.identity import DefaultAzureCredential, get_bearer_token_provider
+# from azure.identity import DefaultAzureCredential, get_bearer_token_provider
 import pandas as pd
 from geopy.geocoders import Nominatim
 from geopy.extra.rate_limiter import RateLimiter
