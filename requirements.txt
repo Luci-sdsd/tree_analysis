@@ -6,7 +6,7 @@
 
 openai==1.99.9
 streamlit
-azure-identity
+# azure-identity
 pandas
 geopy
 pydeck
