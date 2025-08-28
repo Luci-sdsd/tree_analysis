@@ -12,7 +12,6 @@ from geopy.extra.rate_limiter import RateLimiter
 import io
 import pydeck as pdk
 
-headers = 
 
 # --- 1. AZURE OPENAI CLIENT INITIALIZATION ---
 try:
