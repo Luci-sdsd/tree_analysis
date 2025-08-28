@@ -22,9 +22,9 @@ try:
     #     azure_ad_token_provider=token_provider,
     # )
     client = AzureOpenAI(
-        azure_endpoint = os.getenv("AZURE_OPENAI_ENDPOINT_SWEDEN_CENTRAL"), 
-        api_key=os.getenv("AZURE_OPENAI_API_KEY_SWEDEN_CENTRAL"),  
-        api_version=os.getenv("AZURE_OPENAI_API_VERSION")
+        azure_endpoint = st.secrets["auth_endpoint"] # os.getenv("AZURE_OPENAI_ENDPOINT_SWEDEN_CENTRAL"), 
+        api_key= st.secrets["auth_key"]# os.getenv("AZURE_OPENAI_API_KEY_SWEDEN_CENTRAL"),  
+        api_version= st.secrets["auth_verion"] # os.getenv("AZURE_OPENAI_API_VERSION")
       )
     if not os.getenv("AZURE_OPENAI_ENDPOINT_SWEDEN_CENTRAL"):
         st.error("AZURE_OPENAI_ENDPOINT_SWEDEN_CENTRAL environment variable is not set.")
