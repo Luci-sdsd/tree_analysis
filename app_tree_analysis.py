@@ -27,12 +27,13 @@ try:
         api_key= st.secrets["auth_key"], # os.getenv("AZURE_OPENAI_API_KEY_SWEDEN_CENTRAL"),  
         api_version= st.secrets["auth_version"] # os.getenv("AZURE_OPENAI_API_VERSION")
       )
-    if not azure_endpoint: # os.getenv("AZURE_OPENAI_ENDPOINT_SWEDEN_CENTRAL"):
-        st.error("AZURE_OPENAI_ENDPOINT_SWEDEN_CENTRAL environment variable is not set.")
+    if not st.secrets["auth_key"]: # os.getenv("AZURE_OPENAI_API_KEY_SWEDEN_CENTRAL"):
+        st.error("AZURE_OPENAI_API_KEY_SWEDEN_CENTRAL environment variable is not set.")
         st.stop()
 except Exception as e:
-    st.error(f"Failed to initialize Azure OpenAI client with Entra ID: {e}")
-    st.info("Please ensure you are logged in via 'az login' and have the 'Cognitive Services OpenAI User' role.")
+    # st.error(f"Failed to initialize Azure OpenAI client with Entra ID: {e}")
+    # st.info("Please ensure you are logged in via 'az login' and have the 'Cognitive Services OpenAI User' role.")
+    st.error(f"Failed to initialize Azure OpenAI client: {e}")
     st.stop()
 
 # --- 2. MULTI-LANGUAGE SUPPORT ---
