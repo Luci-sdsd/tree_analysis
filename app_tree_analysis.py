@@ -269,7 +269,8 @@ if 'selected_model' not in st.session_state:
 
 # --- SIDEBAR ---
 lang = st.sidebar.selectbox(get_text("English", "select_lang"), options=["English", "Deutsch", "中文"])
-st.session_state.selected_model = st.sidebar.selectbox(get_text(lang, "select_model"), options=["gpt-4.1", "gpt-4o"])
+# st.session_state.selected_model = st.sidebar.selectbox(get_text(lang, "select_model"), options=["gpt-4.1", "gpt-4o"])
+st.session_state.selected_model = st.sidebar.selectbox(get_text(lang, "select_model"), options=["gpt-4.1", "gpt-4.1-mini", "gpt-4o"])
 st.sidebar.button(get_text(lang, "clear_button"), on_click=clear_state, args=(lang,), use_container_width=True)
 
 st.sidebar.markdown("---")
