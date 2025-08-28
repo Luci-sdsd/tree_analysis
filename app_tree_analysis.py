@@ -27,7 +27,7 @@ try:
         api_key= st.secrets["auth_key"], # os.getenv("AZURE_OPENAI_API_KEY_SWEDEN_CENTRAL"),  
         api_version= st.secrets["auth_version"] # os.getenv("AZURE_OPENAI_API_VERSION")
       )
-    if not azure_endpoint # os.getenv("AZURE_OPENAI_ENDPOINT_SWEDEN_CENTRAL"):
+    if not azure_endpoint: # os.getenv("AZURE_OPENAI_ENDPOINT_SWEDEN_CENTRAL"):
         st.error("AZURE_OPENAI_ENDPOINT_SWEDEN_CENTRAL environment variable is not set.")
         st.stop()
 except Exception as e:
