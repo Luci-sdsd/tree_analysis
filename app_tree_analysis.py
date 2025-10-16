@@ -432,15 +432,13 @@ if uploaded_files and st.button(get_text(lang, "analyze_button")):
                 Your response MUST be a single, complete JSON object. Do not add any text outside of this object.
 
                 The JSON structure is:
-
-                {
-                  "tree_type": "The common name and scientific name of the tree species, if identifiable.",
+                { "tree_type": "The common name and scientific name of the tree species, if identifiable.",
                   "approximate_age": "An estimated age of the tree in years (e.g., '10-15 years', 'Mature').",
                   "location": "The likely city and country where the photo was taken (e.g., 'Bonn, Germany'). If unknown, state 'Unknown'.",
                   "native_origins": "A list of up to three primary native countries or regions for this tree species. Example: ['Japan', 'Korea', 'China']. If the species is a hybrid or its origin is unknown, provide an empty list [].",
                   "health_status": "A brief summary (e.g., 'Healthy', 'Showing signs of stress', 'Diseased').",
                   "health_grade": "A single letter grade from A to F (A=Excellent, B=Good, C=Fair, D=Poor, E=Critical, F=Dead).",
-                  "is_diseased": "true or false",
+                  "is_diseased": true or false,
                   "disease_identification": "If is_diseased is true, name the potential disease(s) or pest(s). Otherwise, 'None'.",
                   "detailed_observations": "A paragraph describing what you see in the image (leaf color, bark condition, trunk damage, fungal bodies, structural issues like weak forks or cavities).",
                   "rehabilitation_advice": "If is_diseased is true or health_grade is C or lower, provide a detailed, actionable rehabilitation plan. Otherwise, provide simple maintenance tips.",
@@ -471,7 +469,11 @@ if uploaded_files and st.button(get_text(lang, "analyze_button")):
                         max_completion_tokens=1500, temperature=0.5
                     )
                     result_text = response.choices[0].message.content
-                    analysis_data = json.loads(result_text)
+                    if result_text:
+                        analysis_data = json.loads(result_text)
+                    else:
+                        analysis_data = None
+                        print("No response from model.")
                     result_payload = {"image": img_bytes, "analysis": analysis_data, "error": None, "raw_text": None, "filename": uploaded_file.name}
                 except Exception as e:
                     error_text = getattr(e, 'message', str(e))
