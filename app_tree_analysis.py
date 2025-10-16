@@ -409,11 +409,11 @@ if uploaded_files and st.button(get_text(lang, "analyze_button")):
 
                 Please check specifically for the following indicators, but do not limit your analysis to them:
 
-                * **Deadwood and loose branches:** Risk of falling branches
-                * **Fungal fruiting bodies:** Signs of white rot, brown rot, or soft rot
-                * **Diseased or weak fork (branch junction):** Increased risk of breakage
-                * **Loose or peeling bark:** Possible internal stem decay
-                * **Cavities or broken branches:** Structural instability
+                * **Deadwood and loose branches** → risk of falling branches
+                * **Fungal fruiting bodies** → signs of white rot, brown rot, or soft rot
+                * **Diseased or weak fork (branch junction)** → increased risk of breakage
+                * **Loose or peeling bark** → possible internal stem decay
+                * **Cavities or broken branches** → structural instability
 
                 If none of these indicators are present, state that the tree appears healthy. If no tree is detected in the image, skip the analysis and return exactly: `No tree`.
 
@@ -428,44 +428,37 @@ if uploaded_files and st.button(get_text(lang, "analyze_button")):
                 * **Consequences of Failure:** Identify any potential threats to people, animals, or buildings. Assess whether adjacent trees could be brought down in a domino effect.
                 * **Felling Technique:** If a high hazard exists, determine if a controlled method like rope-assisted or sectional felling is required and specify the necessary safety parameters.
 
-                -----
-
                 ### **Output Format**
-
-                Your response **MUST** be a single, complete JSON object. Do not add any text outside of this object.
+                Your response MUST be a single, complete JSON object. Do not add any text outside of this object.
 
                 The JSON structure is:
 
-                ```json
                 {
-                "tree_type": "The common name and scientific name of the tree species, if identifiable.",
-                "approximate_age": "An estimated age of the tree in years (e.g., '10-15 years', 'Mature').",
-                "location": "The likely city and country where the photo was taken (e.g., 'Bonn, Germany'). If unknown, state 'Unknown'.",
-                "native_origins": [
-                    "A list of up to three primary native countries or regions for this tree species. Example: ['Japan', 'Korea', 'China']. If the species is a hybrid or its origin is unknown, provide an empty list []."
-                ],
-                "health_status": "A brief summary (e.g., 'Healthy', 'Showing signs of stress', 'Diseased').",
-                "health_grade": "A single letter grade from A to F (A=Excellent, B=Good, C=Fair, D=Poor, E=Critical, F=Dead).",
-                "is_diseased": true,
-                "disease_identification": "If is_diseased is true, name the potential disease(s) or pest(s). Otherwise, 'None'.",
-                "detailed_observations": "A paragraph describing what you see in the image (leaf color, bark condition, trunk damage, fungal bodies, structural issues like weak forks or cavities).",
-                "rehabilitation_advice": "If is_diseased is true or health_grade is C or lower, provide a detailed, actionable rehabilitation plan. Otherwise, provide simple maintenance tips.",
-                "risk_assessment": {
+                  "tree_type": "The common name and scientific name of the tree species, if identifiable.",
+                  "approximate_age": "An estimated age of the tree in years (e.g., '10-15 years', 'Mature').",
+                  "location": "The likely city and country where the photo was taken (e.g., 'Bonn, Germany'). If unknown, state 'Unknown'.",
+                  "native_origins": ["A list of up to three primary native countries or regions for this tree species. Example: ['Japan', 'Korea', 'China']. If the species is a hybrid or its origin is unknown, provide an empty list [].",
+                  "health_status": "A brief summary (e.g., 'Healthy', 'Showing signs of stress', 'Diseased')."],
+                  "health_grade": "A single letter grade from A to F (A=Excellent, B=Good, C=Fair, D=Poor, E=Critical, F=Dead).",
+                  "is_diseased": true or false,
+                  "disease_identification": "If is_diseased is true, name the potential disease(s) or pest(s). Otherwise, 'None'.",
+                  "detailed_observations": "A paragraph describing what you see in the image (leaf color, bark condition, trunk damage, fungal bodies, structural issues like weak forks or cavities).",
+                  "rehabilitation_advice": "If is_diseased is true or health_grade is C or lower, provide a detailed, actionable rehabilitation plan. Otherwise, provide simple maintenance tips.",
+                  "risk_assessment": {
                     "infection_and_hazard_potential_grade": "A final comprehensive risk grade (Low, Medium, High, or Critical) based on the factors below.",
                     "infectious_risk_summary": "Summarize contagion risk, including whether removal is needed to protect adjacent trees (e.g., 'High risk of spreading oak wilt to adjacent trees, immediate removal recommended').",
                     "structural_stability_summary": "Summarize structural risks, considering rootstock and trunk integrity, and the likelihood of collapse (e.g., 'Medium risk of spontaneous collapse due to deep trunk cavity').",
                     "consequence_of_failure_summary": "Summarize the threat to targets and potential for a domino effect (e.g., 'Critical threat to a nearby house and power line; high risk of domino effect on two smaller trees')."
-                },
-                "felling_recommendations": {
-                    "recommended_method": "IMPORTANT: If health_grade is 'A' or 'B' AND risk_assessment.infection_and_hazard_potential_grade is 'Low', set this to 'Preservation of this tree is recommended.'. Otherwise, recommend a suitable method (e.g., 'Standard Felling', 'Controlled Sectional Felling', 'Rope-Assisted Felling').",
-                    "safety_parameters": {
+                  },
+                  "felling_recommendations": {
+                    "recommended_method": "IMPORTANT: If health_grade is 'A' or 'B' AND risk_assessment.infection_and_hazard_potential_grade is 'Low', set this to the exact phrase: '" + get_text(lang, "felling_preservation_method") + "'. Otherwise, recommend a suitable felling method (e.g., 'Standard Felling', 'Controlled Sectional Felling').",
+                    "safety_parameters": "If the recommended_method is the preservation phrase, this entire object should be omitted from the JSON. Otherwise, provide the following details.",
                     "minimum_safety_distance_meters": "Required minimum safety distance in meters. 'N/A' if not applicable.",
                     "required_personnel": "Number of personnel and their roles. 'N/A' if not applicable.",
                     "required_equipment": "List of essential technical equipment. 'N/A' if not applicable."
-                    }
+                  }
                 }
-                }
-                ```
+               
                 """
                 result_text = ""
                 try:
