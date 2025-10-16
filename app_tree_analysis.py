@@ -1,4 +1,4 @@
-# filepath: /home/djiang/jiang_ws/coding_ws/tree_health_analysis/app.py
+# filepath: /home/djiang/jiang_ws/coding_ws/tree_health_analysis/app_tree_analysis.py
 import streamlit as st
 from openai import AzureOpenAI #, RateLimitError
 from PIL import Image
@@ -45,6 +45,7 @@ translations = {
         "clear_button": "Clear & Start Over",
         "upload_prompt": "📤 Drag & drop or click to upload tree images",
         "analyze_button": "Analyze Images",
+        "health_grade_header": "Health Grade Assessment",
         "health_grade": "Health Grade",
         "tree_type": "Tree Type",
         "approx_age": "Approx. Age",
@@ -65,7 +66,19 @@ translations = {
         "summary_filename": "Filename",
         "map_legend_header": "Map Legend",
         "map_legend_location": "Photographed Location",
-        "map_legend_origin": "Native Origin"
+        "map_legend_origin": "Native Origin",
+        "risk_assessment_header": "Infection & Hazard Potential",
+        "risk_grade": "Risk Grade",
+        "felling_header": "Felling & Safety Recommendations",
+        "felling_method": "Recommended Method",
+        "felling_safety": "Safety Parameters",
+        "felling_preservation_method": "Tree is healthy. Prioritize preservation measures like pruning, reinforcement, or transplanting.",
+        "risk_grade_low": "Low",
+        "risk_grade_medium": "Medium",
+        "risk_grade_high": "High",
+        "risk_grade_critical": "Critical",
+        "risk_grade_unknown": "Unknown",
+        "risk_legend_header": "Risk Grade Legend"
     },
     "Deutsch": {
         "title": "🌳 Baumgesundheits-Dashboard",
@@ -74,6 +87,7 @@ translations = {
         "clear_button": "Löschen & Neustarten",
         "upload_prompt": "📤 Bilder per Drag & Drop oder Klick hochladen",
         "analyze_button": "Bilder analysieren",
+        "health_grade_header": "Gesundheitsbewertung",
         "health_grade": "Gesundheitsgrad",
         "tree_type": "Baumart",
         "approx_age": "Ungefähres Alter",
@@ -94,7 +108,19 @@ translations = {
         "summary_filename": "Dateiname",
         "map_legend_header": "Kartenlegende",
         "map_legend_location": "Fotografierter Standort",
-        "map_legend_origin": "Heimische Herkunft"
+        "map_legend_origin": "Heimische Herkunft",
+        "risk_assessment_header": "Infektions- und Gefahrenpotenzial",
+        "risk_grade": "Risikograd",
+        "felling_header": "Fäll- und Sicherheitsempfehlungen",
+        "felling_method": "Empfohlene Methode",
+        "felling_safety": "Sicherheitsparameter",
+        "felling_preservation_method": "Baum ist gesund. Priorisieren Sie Erhaltungsmaßnahmen wie Schnitt, Verstärkung oder Umpflanzung.",
+        "risk_grade_low": "Niedrig",
+        "risk_grade_medium": "Mittel",
+        "risk_grade_high": "Hoch",
+        "risk_grade_critical": "Kritisch",
+        "risk_grade_unknown": "Unbekannt",
+        "risk_legend_header": "Legende der Risikograde"
     },
     "中文": {
         "title": "🌳 树木健康仪表板",
@@ -103,6 +129,7 @@ translations = {
         "clear_button": "清除并重新开始",
         "upload_prompt": "📤 拖拽或点击上传树木图片",
         "analyze_button": "分析图片",
+        "health_grade_header": "健康等级评估",
         "health_grade": "健康等级",
         "tree_type": "树木种类",
         "approx_age": "大约年龄",
@@ -123,7 +150,19 @@ translations = {
         "summary_filename": "文件名",
         "map_legend_header": "地图图例",
         "map_legend_location": "拍摄位置",
-        "map_legend_origin": "原生栖息地"
+        "map_legend_origin": "原生栖息地",
+        "risk_assessment_header": "感染与危险潜力评估",
+        "risk_grade": "风险等级",
+        "felling_header": "伐木技术及安全建议",
+        "felling_method": "推荐方法",
+        "felling_safety": "安全参数",
+        "felling_preservation_method": "树木健康，优先考虑修剪、加固或移植等保护措施。",
+        "risk_grade_low": "低",
+        "risk_grade_medium": "中",
+        "risk_grade_high": "高",
+        "risk_grade_critical": "危急",
+        "risk_grade_unknown": "未知",
+        "risk_legend_header": "风险等级图例"
     }
 }
 
@@ -151,6 +190,16 @@ def get_grade_details(grade):
         "F": {"color": "#6c757d", "value": 0, "desc": "Failed / Dead", "icon": "💀"},
     }
     return grade_map.get(str(grade).upper(), {"color": "#6c757d", "value": 0, "desc": "Unknown", "icon": "❓"})
+
+def get_risk_grade_details(grade, lang):
+    """Maps a risk grade to a color, value, description, and icon."""
+    grade_map = {
+        "LOW":      {"color": "#28a745", "value": 25, "desc": get_text(lang, "risk_grade_low"), "icon": "🛡️"},
+        "MEDIUM":   {"color": "#ffc107", "value": 50, "desc": get_text(lang, "risk_grade_medium"), "icon": "⚠️"},
+        "HIGH":     {"color": "#fd7e14", "value": 75, "desc": get_text(lang, "risk_grade_high"), "icon": "🔥"},
+        "CRITICAL": {"color": "#dc3545", "value": 100, "desc": get_text(lang, "risk_grade_critical"), "icon": "🚨"},
+    }
+    return grade_map.get(str(grade).upper(), {"color": "#6c757d", "value": 0, "desc": get_text(lang, "risk_grade_unknown"), "icon": "❓"})
 
 def create_progress_circle(progress, color, size=120):
     stroke_width = 10
@@ -198,6 +247,8 @@ def display_result_card(container, result, idx, lang):
         st.image(result["image"], use_container_width=True, caption=f"Tree {idx+1}")
         
         if result["analysis"]:
+            st.markdown("---")
+            st.subheader(get_text(lang, "health_grade_header"))
             res = result["analysis"]
             grade = res.get("health_grade", "N/A")
             grade_details = get_grade_details(grade)
@@ -215,6 +266,40 @@ def display_result_card(container, result, idx, lang):
             - **{get_text(lang, 'location')}:** {res.get('location', 'N/A')}
             - **{get_text(lang, 'native_origins')}:** {', '.join(res.get('native_origins', [])) or 'N/A'}
             """)
+
+            # --- Display Risk Assessment ---
+            if "risk_assessment" in res and res["risk_assessment"]:
+                st.markdown("---")
+                st.subheader(get_text(lang, "risk_assessment_header"))
+                risk_grade = res["risk_assessment"].get("infection_and_hazard_potential_grade", "N/A")
+                risk_details = get_risk_grade_details(risk_grade, lang)
+                
+                risk_viz_col1, risk_viz_col2 = st.columns([1, 2])
+                with risk_viz_col1:
+                    st.image(create_progress_circle(risk_details["value"], risk_details["color"]), use_container_width=True)
+                with risk_viz_col2:
+                    st.metric(label=get_text(lang, "risk_grade"), value=risk_details["desc"])
+                    st.markdown(f"**{risk_details['icon']} {risk_details['desc']}**")
+
+            # --- Display Felling Recommendations ---
+            if "felling_recommendations" in res and res["felling_recommendations"]:
+                st.markdown("---")
+                st.subheader(get_text(lang, "felling_header"))
+                felling = res["felling_recommendations"]
+                st.markdown(f"**{get_text(lang, 'felling_method')}:** {felling.get('recommended_method', 'N/A')}")
+                
+                # Conditionally display safety parameters
+                # Hide if the method is the preservation one, or if the parameters object is missing/empty.
+                preservation_method_text = get_text(lang, "felling_preservation_method")
+                if "safety_parameters" in felling and felling.get("recommended_method") != preservation_method_text:
+                    st.markdown(f"**{get_text(lang, 'felling_safety')}:**")
+                    safety = felling["safety_parameters"]
+                    safety_text = f"""
+                    - **Min. Safety Distance:** {safety.get('minimum_safety_distance_meters', 'N/A')} meters
+                    - **Personnel:** {safety.get('required_personnel', 'N/A')}
+                    - **Equipment:** {safety.get('required_equipment', 'N/A')}
+                    """
+                    st.info(safety_text)
 
             with st.expander(get_text(lang, "details_expander")):
                 st.markdown(f"**{get_text(lang, 'observations')}:**")
@@ -269,8 +354,7 @@ if 'selected_model' not in st.session_state:
 
 # --- SIDEBAR ---
 lang = st.sidebar.selectbox(get_text("English", "select_lang"), options=["English", "Deutsch", "中文"])
-# st.session_state.selected_model = st.sidebar.selectbox(get_text(lang, "select_model"), options=["gpt-4.1", "gpt-4o"])
-st.session_state.selected_model = st.sidebar.selectbox(get_text(lang, "select_model"), options=["gpt-4.1", "gpt-4.1-mini", "gpt-4o"])
+st.session_state.selected_model = st.sidebar.selectbox(get_text(lang, "select_model"), options=["gpt-4.1", "gpt-4.1-mini"])
 st.sidebar.button(get_text(lang, "clear_button"), on_click=clear_state, args=(lang,), use_container_width=True)
 
 st.sidebar.markdown("---")
@@ -278,6 +362,12 @@ st.sidebar.subheader(get_text(lang, "legend_header"))
 for grade in ["A", "B", "C", "D", "E", "F"]:
     details = get_grade_details(grade)
     st.sidebar.markdown(f"<span style='color:{details['color']};'>**{grade}**: {details['icon']} {details['desc']}</span>", unsafe_allow_html=True)
+
+st.sidebar.markdown("---")
+st.sidebar.subheader(get_text(lang, "risk_legend_header"))
+for grade_key in ["LOW", "MEDIUM", "HIGH", "CRITICAL"]:
+    details = get_risk_grade_details(grade_key, lang)
+    st.sidebar.markdown(f"<span style='color:{details['color']};'>**{details['icon']}** {details['desc']}</span>", unsafe_allow_html=True)
 
 st.sidebar.markdown("---")
 st.sidebar.subheader(get_text(lang, "map_legend_header"))
@@ -311,33 +401,71 @@ if uploaded_files and st.button(get_text(lang, "analyze_button")):
                 base64_image = encode_image(img_bytes)
                 
                 system_prompt = """
-                
-                You are a professional botanist and tree pathologist. 
-                Analyze the user-submitted tree image and provide a clear health assessment. 
-                Please check specifically for the following indicators, but not limited to them:
-                1. Deadwood and loose branches → risk of falling branches
-                2. Fungal fruiting bodies → signs of white rot, brown rot, or soft rot
-                3. Diseased or weak fork (branch junction) → increased risk of breakage
-                4. Loose or peeling bark → possible internal stem decay
-                5. Cavities or broken branches → structural instability
-                If none of these indicators are present, state that the tree appears healthy. 
-                If no tree is detected in the image, skip the analysis and return exactly: 'No tree'.
-                
-                Your response MUST be a single JSON object.
+                You are a professional botanist, tree pathologist, certified arborist, tree risk assessor, and experienced forestry worker.
+                Analyze the user-submitted tree image for two separate goals:
+                1)  **Clear Health Assessment** and 2) **Comprehensive Risk Assessment**.
+
+                ### **Health Assessment**
+
+                Please check specifically for the following indicators, but do not limit your analysis to them:
+
+                * **Deadwood and loose branches:** Risk of falling branches
+                * **Fungal fruiting bodies:** Signs of white rot, brown rot, or soft rot
+                * **Diseased or weak fork (branch junction):** Increased risk of breakage
+                * **Loose or peeling bark:** Possible internal stem decay
+                * **Cavities or broken branches:** Structural instability
+
+                If none of these indicators are present, state that the tree appears healthy. If no tree is detected in the image, skip the analysis and return exactly: `No tree`.
+
+                -----
+
+                ### **Risk Assessment**
+
+                Drawing on your expertise as a forestry worker, evaluate the following critical risk factors:
+
+                * **Infection Potential:** Determine if any detected disease is infectious (e.g., fungus, beetle infestation) and assess if immediate removal is necessary to protect neighboring trees.
+                * **Trunk Stability:** Analyze if the trunk or rootstock is weakened by rot, pest infestation, or soil erosion, and evaluate the probability of a spontaneous collapse.
+                * **Consequences of Failure:** Identify any potential threats to people, animals, or buildings. Assess whether adjacent trees could be brought down in a domino effect.
+                * **Felling Technique:** If a high hazard exists, determine if a controlled method like rope-assisted or sectional felling is required and specify the necessary safety parameters.
+
+                -----
+
+                ### **Output Format**
+
+                Your response **MUST** be a single, complete JSON object. Do not add any text outside of this object.
+
                 The JSON structure is:
+
+                ```json
                 {
-                  "tree_type": "The common name and scientific name of the tree species, if identifiable.",
-                  "approximate_age": "An estimated age of the tree in years (e.g., '10-15 years', 'Mature').",
-                  "location": "The likely city and country where the photo was taken (e.g., 'Bonn, Germany'). If unknown, state 'Unknown'.",
-                  "native_origins": "A list of up to three primary native countries or regions for this tree species. Example: ['Japan', 'Korea', 'China']. If the species is a hybrid or its origin is unknown, provide an empty list [].",
-                  "health_status": "A brief summary (e.g., 'Healthy', 'Showing signs of stress', 'Diseased').",
-                  "health_grade": "A single letter grade from A to F (A=Excellent, B=Good, C=Fair, D=Poor, E=Critical, F=Dead).",
-                  "is_diseased": true or false,
-                  "disease_identification": "If is_diseased is true, name the potential disease(s) or pest(s). Otherwise, 'None'.",
-                  "detailed_observations": "A paragraph describing what you see in the image (leaf color, bark condition, trunk damage, etc.).",
-                  "rehabilitation_advice": "If is_diseased is true or health_grade is C or lower, provide a detailed, actionable rehabilitation plan. Otherwise, provide simple maintenance tips."
+                "tree_type": "The common name and scientific name of the tree species, if identifiable.",
+                "approximate_age": "An estimated age of the tree in years (e.g., '10-15 years', 'Mature').",
+                "location": "The likely city and country where the photo was taken (e.g., 'Bonn, Germany'). If unknown, state 'Unknown'.",
+                "native_origins": [
+                    "A list of up to three primary native countries or regions for this tree species. Example: ['Japan', 'Korea', 'China']. If the species is a hybrid or its origin is unknown, provide an empty list []."
+                ],
+                "health_status": "A brief summary (e.g., 'Healthy', 'Showing signs of stress', 'Diseased').",
+                "health_grade": "A single letter grade from A to F (A=Excellent, B=Good, C=Fair, D=Poor, E=Critical, F=Dead).",
+                "is_diseased": true,
+                "disease_identification": "If is_diseased is true, name the potential disease(s) or pest(s). Otherwise, 'None'.",
+                "detailed_observations": "A paragraph describing what you see in the image (leaf color, bark condition, trunk damage, fungal bodies, structural issues like weak forks or cavities).",
+                "rehabilitation_advice": "If is_diseased is true or health_grade is C or lower, provide a detailed, actionable rehabilitation plan. Otherwise, provide simple maintenance tips.",
+                "risk_assessment": {
+                    "infection_and_hazard_potential_grade": "A final comprehensive risk grade (Low, Medium, High, or Critical) based on the factors below.",
+                    "infectious_risk_summary": "Summarize contagion risk, including whether removal is needed to protect adjacent trees (e.g., 'High risk of spreading oak wilt to adjacent trees, immediate removal recommended').",
+                    "structural_stability_summary": "Summarize structural risks, considering rootstock and trunk integrity, and the likelihood of collapse (e.g., 'Medium risk of spontaneous collapse due to deep trunk cavity').",
+                    "consequence_of_failure_summary": "Summarize the threat to targets and potential for a domino effect (e.g., 'Critical threat to a nearby house and power line; high risk of domino effect on two smaller trees')."
+                },
+                "felling_recommendations": {
+                    "recommended_method": "IMPORTANT: If health_grade is 'A' or 'B' AND risk_assessment.infection_and_hazard_potential_grade is 'Low', set this to 'Preservation of this tree is recommended.'. Otherwise, recommend a suitable method (e.g., 'Standard Felling', 'Controlled Sectional Felling', 'Rope-Assisted Felling').",
+                    "safety_parameters": {
+                    "minimum_safety_distance_meters": "Required minimum safety distance in meters. 'N/A' if not applicable.",
+                    "required_personnel": "Number of personnel and their roles. 'N/A' if not applicable.",
+                    "required_equipment": "List of essential technical equipment. 'N/A' if not applicable."
+                    }
                 }
-                Do not add any text or formatting outside of this JSON object.
+                }
+                ```
                 """
                 result_text = ""
                 try:
@@ -381,7 +509,8 @@ if st.session_state.batch_results:
             if lat and lon:
                 location_points.append({
                     "lat": lat, "lon": lon, 
-                    "tooltip": f"<b>Photographed Location</b><br>{loc_str}",
+                    #"tooltip": f"<b>Photographed Location</b><br>{loc_str}",
+                    "tooltip": f"<b>Photographed Location</b><br>File: {result.get('filename', 'N/A')}<br>Species: {res.get('tree_type', 'N/A')}<br>Photographed Location: {loc_str}",
                     "location_text": loc_str
                 })
             elif loc_str.lower() not in ['n/a', 'unknown']:
@@ -394,13 +523,16 @@ if st.session_state.batch_results:
                 if origin_lat and origin_lon:
                     origin_points.append({
                         "lat": origin_lat, "lon": origin_lon,
-                        "tooltip": f"<b>Native Origin: {res.get('tree_type')}</b><br>{origin_loc}"
+                        #"tooltip": f"<b>Native Origin: {res.get('tree_type')}</b><br>{origin_loc}"
+                        #"tooltip": f"<b>Location Info</b><br>File: {result.get('filename', 'N/A')}<br>Species: {res.get('tree_type', 'N/A')}<br>Location: {origin_loc}"
+                        "tooltip": f"<b>Native Origin</b><br>File: {result.get('filename', 'N/A')}<br>Species: {res.get('tree_type', 'N/A')}<br>Location: {origin_loc}"
                     })
 
             summary_data.append({
                 get_text(lang, "summary_filename"): result.get("filename", "N/A"),
                 "Thumbnail": image_to_html_thumbnail(result['image']),
                 get_text(lang, "health_grade"): res.get('health_grade', 'N/A'),
+                get_text(lang, "risk_grade"): res.get('risk_assessment', {}).get('infection_and_hazard_potential_grade', 'N/A'),
                 get_text(lang, "tree_type"): res.get('tree_type', 'N/A'),
                 get_text(lang, "location"): loc_str,
                 get_text(lang, "native_origins"): ', '.join(native_origins) or 'N/A',
@@ -410,6 +542,7 @@ if st.session_state.batch_results:
                 get_text(lang, "summary_filename"): result.get("filename", "N/A"), 
                 "Thumbnail": image_to_html_thumbnail(result['image']), 
                 get_text(lang, "health_grade"): "Error", 
+                get_text(lang, "risk_grade"): "Error",
                 get_text(lang, "tree_type"): "Error", 
                 get_text(lang, "location"): "Error",
                 get_text(lang, "native_origins"): "Error"
