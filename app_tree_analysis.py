@@ -440,7 +440,7 @@ if uploaded_files and st.button(get_text(lang, "analyze_button")):
                   "native_origins": "A list of up to three primary native countries or regions for this tree species. Example: ['Japan', 'Korea', 'China']. If the species is a hybrid or its origin is unknown, provide an empty list [].",
                   "health_status": "A brief summary (e.g., 'Healthy', 'Showing signs of stress', 'Diseased').",
                   "health_grade": "A single letter grade from A to F (A=Excellent, B=Good, C=Fair, D=Poor, E=Critical, F=Dead).",
-                  "is_diseased": true or false,
+                  "is_diseased": "true or false",
                   "disease_identification": "If is_diseased is true, name the potential disease(s) or pest(s). Otherwise, 'None'.",
                   "detailed_observations": "A paragraph describing what you see in the image (leaf color, bark condition, trunk damage, fungal bodies, structural issues like weak forks or cavities).",
                   "rehabilitation_advice": "If is_diseased is true or health_grade is C or lower, provide a detailed, actionable rehabilitation plan. Otherwise, provide simple maintenance tips.",
